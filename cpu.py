@@ -10,6 +10,7 @@ class CPU:
         self.SP = 7 #stack pointer
         self.pc = 0
         self.fl = False
+       
 
     def ram_read(self, position):
         return self.ram[position]
@@ -44,8 +45,8 @@ class CPU:
 
         try:
             address = 0
-            # fp = open(sys.argv[1], 'r')
-            fp = open('sctest.ls8','r')
+            fp = open(sys.argv[1], 'r')
+            # fp = open('sctest.ls8','r')
             for line in fp:
                 if line[0] == '#':
                     continue
@@ -73,9 +74,11 @@ class CPU:
         # elif op == "MUL":
         #     self.reg[reg_a] *= self.reg[reg_b]
         # compares reg a to reg b, to see if reg a is less than or equal to reg b TODO: need logic somewhere for greater than
-        elif op == "CMP":
-           self.reg[reg_a] <= self.reg[reg_b]
-           return self.fl == True 
+        # elif op == "CMP":
+        #     if self.reg[reg_a] <= self.reg[reg_b]:
+        #         self.fl = True
+        #     else:
+        #         self.fl = False  
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -125,12 +128,41 @@ class CPU:
                 self.pc += 3
             # JMP
             elif self.ram[self.pc] == 0b01010100:
-                register = self.ram_read(self.pc)
+                register = self.ram_read(self.pc+1)
                 self.pc = register
+                self.pc+=1
+
             # JEQ
             elif self.ram[self.pc] == 0b01010101:
-                self.fl == True
+                if self.fl == True:
+                    register = self.ram_read(self.pc+1)
+                    self.pc = register
+                else:
+                    self.pc += 2
+
             # JNE
             elif self.ram[self.pc] == 0b01010110:
-                self.fl == True
+                if self.fl == True:
+                    register = self.ram_read(self.pc+1)
+                    self.pc = register
+                else:
+                    self.pc += 2
+                
+            #CMP
+            elif self.ram[self.pc] == 0b10100111:
+                reg_a = self.reg[self.ram_read(self.pc+1)]
+                reg_b = self.reg[self.ram_read(self.pc+2)]
+                if reg_a == reg_b:
+                    self.fl = True
+                    self.pc += 3
+                elif reg_a < reg_b & self.fl == True:
+                    self.fl = False
+                    self.pc += 3
+                elif reg_a > reg_b & self.fl == True:
+                    self.fl = True
+                    self.pc += 3
+                else:
+                    self.fl = False
+                    self.pc += 3
+            
         
