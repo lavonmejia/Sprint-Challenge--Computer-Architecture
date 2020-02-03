@@ -12,4 +12,4 @@ cpu.load()
 cpu.run()
 
 
-# cpu.trace()
+cpu.trace()
